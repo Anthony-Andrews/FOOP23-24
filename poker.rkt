@@ -3,7 +3,6 @@
 ; Scoring Poker Hands
 
 ; Your name: Anthony Andrews 
-; Further thanks must go to Seth Li who helped debug and my father, who despite knowing nothing about scheme, helped tremendously.
 
 ; Starter code last updated: 11/30/22 by Takeshi Kaneko
 
@@ -419,13 +418,13 @@
 ; XXYYx XXxYY xXXYY
 ; As such we just check for the first two and get the corresponding ranks. 
 ;This could all be acomplished in recusion, but it would use more lines and be more computationally intensive in both processing and memory.
-(define (two-pair rhand hand)
+(define (two-pair rhand hand) ; rhand is called by the test code here but not used ¯\_(ツ)_/¯
     (cond 
         ((and (equal-next-rank? hand 1) (equal-next-rank? hand 3))
-            (plural-card (item 1 hand)) 'and (plural-card (item 3 hand))
+            (se '(two pair - ) (plural-card (item 1 hand)) 'and (plural-card (item 3 hand)))
         )
         ((and (equal-next-rank? hand 1) (equal-next-rank? hand 4))
-           (plural-card (item 1 hand)) 'and (plural-card (item 4 hand))
+            (se '(two pair - ) (plural-card (item 1 hand)) 'and (plural-card (item 4 hand)))
         )
         (else 
             (se '(two pair - ) (plural-card (item 2 hand)) 'and (plural-card (item 5 hand)))
@@ -508,13 +507,11 @@
                              twopxxyyX twopxxXyy twopXxxyy
                              pxxXXX pXxxXX pXXxxX pXXXxx high))
 
-;(define all-test-hands (list pxxXXX pXXXxx)) ; This was being used to test specifically the pair non-predicate function as I was really struggling debugging that one. Coding Rooms does not make for a great IDE ;-;
-
 ; Special testing code for a royal flush
-;(let [(hand (sort (car rf)))]
+(let [(hand (sort (car rf)))]
 ; NOTE: Each of the following five lines is designed to work
 ;       independently.  Uncomment these lines ONE-at-a-time.
-;  (append '(royal flush test hand is) (list hand)))
+  (append '(royal flush test hand is) (list hand)))
 ;  (cons hand (append '(is) (if (straight? hand) '() '(not)) '(a straight))))
 ;  (cons hand (append '(is) (if (flush? hand) '() '(not)) '(a flush))))
 ;  (cons hand (append '(is) (if (straight-flush? hand) '() '(not)) '(a straight flush))))
@@ -561,3 +558,35 @@
 ; NOTE: Uncomment this ONLY when you are done testing for
 ;       a royal flush above.
 (test-results)
+
+
+
+; ============= MORE TEST CODE ============
+;
+; input:
+;   (poker-value '(h4 s4 c6 s6 c4))
+; expected output:
+;   '(full house - fours full of sixes)
+;
+;
+;
+; input:
+;   (poker-value '(h7 s3 c5 c4 d6))
+; expected otuput:
+;   '(seven-high straight)
+;
+;
+;
+; input:
+;   (poker-value '(dq d10 dj da dk))
+; expected output:
+;   '(royal flush - diamonds)
+;
+;
+;
+; input:
+;   (poker-value '(da d6 d3 c9 h6))
+; expected output:
+;   '(pair of sixes)
+;
+;=============================================
