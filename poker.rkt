@@ -383,7 +383,7 @@
 
 ; For three-of-a-kind , there are only 3 possible cases: xxXXX xXXXx or XXXxx. In all of them the middle card (item 3) is part of the three of a kind. As such we take the rank from it.
 (define (three-of-a-kind rhand hand)
-        (se 'three (rank-name (item 3 hand)))
+        (se 'three (plural-card (item 3 hand)))
 )
 
 ; full-house takes a full house as an input and returns
