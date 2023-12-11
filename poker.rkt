@@ -3,6 +3,7 @@
 ; Scoring Poker Hands
 
 ; Your name: Anthony Andrews 
+; Further thanks must go to Seth Li who helped debug and my father, who despite knowing nothing about scheme, helped tremendously.
 
 ; Starter code last updated: 11/30/22 by Takeshi Kaneko
 
