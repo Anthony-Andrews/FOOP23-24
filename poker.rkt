@@ -442,6 +442,45 @@
 ; Hooray it's over and works! Thanks for taking the time to read these comments :D
 
 ; ************************************************************
+; EXTENSION CODE
+; ************************************************************
+
+; " In some versions of poker, each player gets seven cards and can choose any five of the seven to make a hand. With seven cards, you have to pick the best category that can be made from your cards.  
+; Write a procedure poker-hand-7 that takes in a hand of seven cards and returns the highest-value five-card hand with the hand's value."
+
+(define r 5) ; number of items in final combination - this represents a five card hand.
+
+(define checks (list royal-flush? straight-flush? four-of-a-kind? full-house? flush? straight? three-of-a-kind? two-pair? pair?))
+
+(define (generate-combinations base-list)
+    (define (combinations-helper lst r acc)
+        (cond
+            ((= r 0) (list acc))                  ; Base case: return a list containing the accumulated combination
+            ((null? lst) '())                    ; Base case: return an empty list if the input list is empty
+            (else 
+                (append (combinations-helper (bf lst) (- r 1) (cons (car lst) acc))
+                (combinations-helper (bf lst) r acc))
+            )
+        )
+    )
+    (combinations-helper base-list r '())
+)
+
+(define (poker-hand-7 unsorted)
+    (let ((sorted-7  (map sort (generate-combinations unsorted))  ))
+        (define (rank-search check nested-hand)
+            (cond 
+                ((null? check) (car nested-hand)) ; all predicate test failed, this is the high card.
+                ((equal? 0 (length nested-hand)) (rank-search (cdr check) sorted-7))
+                ((car check) (car nested-hand) (car nested-hand))
+                (else (rank-search check (cdr nested-hand)))
+            )
+        )
+        (rank-search checks sorted-7)
+    )
+)
+
+; ************************************************************
 ; MAIN PROGRAM
 ; ************************************************************
 
