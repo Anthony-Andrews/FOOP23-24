@@ -368,7 +368,7 @@
 ; NOTE: returns #f if no pair exists
 
 (define (pair hand)
-    (show (se 'pair hand)) ; Only place where the debugging is left uncommented because I was banging my head against a desk for hours on this one... This honestly might be an oversight in the testing program im not sure.
+;    (show (se 'pair hand)) ; Only place where the debugging is left uncommented because I was banging my head against a desk for hours on this one... This honestly might be an oversight in the testing program im not sure.
     (if (equal? (item 1 hand) (item 2 hand)) ; IMPORTANT NOTE : (equal-next-rank?) cannot be used here as it expects card format not number format.
             (se '(pair of ) (pluralize (rank-name (item 1 hand)))) ; same goes for not using (plural-card) since it expects card format.
             (pair (bf hand))
@@ -448,37 +448,61 @@
 ; " In some versions of poker, each player gets seven cards and can choose any five of the seven to make a hand. With seven cards, you have to pick the best category that can be made from your cards.  
 ; Write a procedure poker-hand-7 that takes in a hand of seven cards and returns the highest-value five-card hand with the hand's value."
 
-(define r 5) ; number of items in final combination - this represents a five card hand.
+(define r 5) ; number of items in final combination - this represents a five card hand. For a 5 card hand out of a 7 card pool, there are 21 possible permutations.
 
-(define checks (list royal-flush? straight-flush? four-of-a-kind? full-house? flush? straight? three-of-a-kind? two-pair? pair?))
+(define checks (list royal-flush? straight-flush? four-of-a-kind? full-house? flush? straight? three-of-a-kind? two-pair? pair?)) ; lists all the predicates that must be checked in order from highest to lowest to ensure that the highest hand is being found.
 
-(define (generate-combinations base-list)
+; this function is a bit of a doosy. be iterrating over r and acc it can generate all possible combinations of a given list. The possible permutations is derived using the combination formula. Here we are doing something similar.
+(define (generate-combinations base-list) ; this behaves the same as a seperate caller function except its just wrapped around the actual function.
     (define (combinations-helper lst r acc)
         (cond
             ((= r 0) (list acc))                  ; Base case: return a list containing the accumulated combination
             ((null? lst) '())                    ; Base case: return an empty list if the input list is empty
-            (else 
-                (append (combinations-helper (bf lst) (- r 1) (cons (car lst) acc))
+            (else
+                (append (combinations-helper (bf lst) (- r 1) (cons (car lst) acc)) ; here append and cons are behaving like sentence, and car is behvaing like first. The reason which they are required in this instance is because we are using nested lists and sentence and first do not allow nested sentences.
                 (combinations-helper (bf lst) r acc))
             )
         )
     )
-    (combinations-helper base-list r '())
+    (combinations-helper base-list r '()) ; This invocates the start of the recusive function using starting parameters.
 )
 
-(define (poker-hand-7 unsorted)
-    (let ((sorted-7  (map sort (generate-combinations unsorted))  ))
-        (define (rank-search check nested-hand)
-            (cond 
-                ((null? check) (car nested-hand)) ; all predicate test failed, this is the high card.
-                ((equal? 0 (length nested-hand)) (rank-search (cdr check) sorted-7))
-                ((car check) (car nested-hand) (car nested-hand))
-                (else (rank-search check (cdr nested-hand)))
+; This function is suprisingly similar in structure to the previous. It recusively checks each of the previous generated possible permutations for royal flush, then straight flush, etc, etc as stated by (define checks)
+; Although it's meant for 7 card hands, this function will work for any number of cards!
+
+(define (best-hand unsorted)
+    (let ((sorted-combos  (map sort (generate-combinations unsorted))  )) ; its very important that (map) is used here instead of every since every will flatten the nested sentences passed in. (map) does not do this.
+        (define (rank-search check combos)
+            ;(show combos)
+            ;(show (se '(failed predicate check) (- 10 (length check)))) ; very useful verbose debugging to see which predicate check the function fails on.
+            (cond
+
+                ((null? check) (car combos)) ; all predicate test failed, this is the high card.
+                ((null? combos) (rank-search (cdr check) sorted-combos) ) ; case where predicate (first being royal-flush?) is checked against all hands and all are false.
+
+                ((apply (car check) (list (car combos))) ; first check with first hand NOTE: apply and list are needed here for syntactical reasons. Otherwise it would be impossible to apply a list of functions to a singular list.
+                    ;(show combos) debugging verbosity.
+                    ;(show check)
+                    (car combos) ; found best hand case:
+                )
+
+                (else (rank-search check (cdr combos)))
             )
+            ;(show check-hand-helper)
         )
-        (rank-search checks sorted-7)
+        (rank-search checks sorted-combos)
     )
 )
+
+(define (poker-hand-7 hand)
+    (let ((best (best-hand hand)))
+        (se '(The best possible hand is:) best '- (poker-value best)) ; helper function to just add some text.
+    )
+)
+; (poker-hand-7 '(sa s5 sk cj c4 c5 c6 ha h4 h6 h3 h4 h8 h2 h2))
+; '(The best possible hand is: sa ha h4 c4 h4 - full house - fours full of aces)
+
+; pretty proud of this one :D
 
 ; ************************************************************
 ; MAIN PROGRAM
@@ -628,4 +652,13 @@
 ; expected output:
 ;   '(pair of sixes)
 ;
+; input:
+;   (poker-hand-7 '(sa h3 d7 sk sq sj s10))
+; expected output:
+;   '(The best possible hand is: sa sk sq sj s10 - royal flush - spades)
+;
+; input:
+;   (poker-hand-7 '(sa s5 sk cj c4 c5 c6 ha h4 h6 h3 h4 h8 h2 h2))
+; expected output:
+;   '(The best possible hand is: sa ha h4 c4 h4 - full house - fours full of aces)
 ;=============================================
